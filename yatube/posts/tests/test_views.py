@@ -59,9 +59,6 @@ class ViewsTestContext(TestCase):
                 }
             ),
             'posts/create_post.html': reverse(
-                'posts:post_create'
-            ),
-            'posts/create_post.html': reverse(
                 'posts:post_edit',
                 kwargs={
                     'post_id': self.post.pk
