@@ -174,7 +174,9 @@ class PaginatorViewsTest(TestCase):
         self.assertEqual(len(response.context['page_obj']), settings.COUNTLIST)
 
     def test_paginator_index_second_page(self):
-        response = self.authorized_client.get(reverse('posts:index') + '?page=2')
+        response = self.authorized_client.get(reverse(
+            'posts:index'
+        ) + '?page=2')
         self.assertEqual(len(response.context['page_obj']), 3)
 
     def test_paginator_group_list_first_page(self):
