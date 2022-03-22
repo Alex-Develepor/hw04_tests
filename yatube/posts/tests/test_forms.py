@@ -26,7 +26,6 @@ class FormTest(TestCase):
             text='Test text',
         )
 
-
     def test_post(self):
         count_posts = Post.objects.count()
         form_data = {
