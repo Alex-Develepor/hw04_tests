@@ -43,7 +43,7 @@ class ViewsTestContext(TestCase):
             'posts/group_list.html': reverse(
                 'posts:group_list',
                 kwargs={
-                    'slug': 'test_slug'
+                    'slug': self.post.group.slug
                 }
             ),
             'posts/profile.html': reverse(
@@ -70,15 +70,26 @@ class ViewsTestContext(TestCase):
                 response = self.authorized_client.get(reverse_name)
                 self.assertTemplateUsed(response, template)
 
+    def first_elem_context_page_obj(self, object):
+        post_text_0 = object.text
+        post_author_0 = object.author.username
+        post_group_0 = object.group.title
+        return (post_text_0,
+                post_author_0,
+                post_group_0)
+
+    def first_elem_context_group(self, object):
+        group_title_0 = object.title
+        group_slug_0 = object.slug
+        return group_title_0, group_slug_0
+
     def test_index_page_context_correct(self):
         response = self.authorized_client.get(reverse('posts:index'))
         first_object = response.context['page_obj'][0]
-        post_text_0 = first_object.text
-        post_author_0 = first_object.author.username
-        post_group_0 = first_object.group.title
-        self.assertEqual(post_text_0, 'Test another text')
-        self.assertEqual(post_author_0, 'TestName2')
-        self.assertEqual(post_group_0, 'Test another title')
+        post_context = self.first_elem_context_page_obj(first_object)
+        self.assertEqual(post_context[0], self.post_second.text)
+        self.assertEqual(post_context[1], self.post_second.author.username)
+        self.assertEqual(post_context[2], self.post_second.group.title)
 
     def test_group_list_context_correct(self):
         response = self.authorized_client.get(reverse(
@@ -88,25 +99,22 @@ class ViewsTestContext(TestCase):
             }
         ))
         first_object = response.context['group']
-        group_title_0 = first_object.title
-        group_slug_0 = first_object.slug
-        self.assertEqual(group_title_0, 'Test another title')
-        self.assertEqual(group_slug_0, 'test_another_slug')
+        group_context = self.first_elem_context_group(first_object)
+        self.assertEqual(group_context[0], self.post_second.group.title)
+        self.assertEqual(group_context[1], self.post_second.group.slug)
 
     def test_profile_page_context_correct(self):
         response = self.authorized_client.get(reverse(
             'posts:profile',
             kwargs={
-                'username': 'TestName2'
+                'username': self.post_second.author.username
             }
         ))
         first_object = response.context['page_obj'][0]
-        post_text = first_object.text
-        post_author = response.context['author'].username
-        group_title = first_object.group.title
-        self.assertEqual(group_title, 'Test another title')
-        self.assertEqual(post_text, 'Test another text')
-        self.assertEqual(post_author, 'TestName2')
+        post_context = self.first_elem_context_page_obj(first_object)
+        self.assertEqual(post_context[2], self.post_second.group.title)
+        self.assertEqual(post_context[0], self.post_second.text)
+        self.assertEqual(post_context[1], self.post_second.author.username)
 
     def test_post_detail_context_correct(self):
         response = self.authorized_client.get(reverse(
@@ -168,6 +176,7 @@ class PaginatorViewsTest(TestCase):
                 pub_date='01.11.1998',
                 group=cls.group
             )
+        cls.count_posts = Post.objects.count()
 
     def test_paginator_index_first_page(self):
         response = self.authorized_client.get(reverse('posts:index'))
@@ -177,7 +186,10 @@ class PaginatorViewsTest(TestCase):
         response = self.authorized_client.get(reverse(
             'posts:index'
         ) + '?page=2')
-        self.assertEqual(len(response.context['page_obj']), 3)
+        self.assertEqual(
+            len(response.context['page_obj']),
+            self.count_posts - settings.COUNTLIST
+        )
 
     def test_paginator_group_list_first_page(self):
         response = self.authorized_client.get(reverse(
@@ -195,7 +207,10 @@ class PaginatorViewsTest(TestCase):
                 'slug': 'test_slug',
             }
         ) + '?page=2')
-        self.assertEqual(len(response.context['page_obj']), 3)
+        self.assertEqual(
+            len(response.context['page_obj']),
+            self.count_posts - settings.COUNTLIST
+        )
 
     def test_paginator_profile_first_page(self):
         response = self.authorized_client.get(reverse(
@@ -213,4 +228,7 @@ class PaginatorViewsTest(TestCase):
                 'username': self.user,
             }
         ) + '?page=2')
-        self.assertEqual(len(response.context['page_obj']), 3)
+        self.assertEqual(
+            len(response.context['page_obj']),
+            self.count_posts - settings.COUNTLIST
+        )
