@@ -70,26 +70,28 @@ class ViewsTestContext(TestCase):
                 response = self.authorized_client.get(reverse_name)
                 self.assertTemplateUsed(response, template)
 
-    def first_elem_context_page_obj(self, object):
-        post_text_0 = object.text
-        post_author_0 = object.author.username
-        post_group_0 = object.group.title
-        return (post_text_0,
-                post_author_0,
-                post_group_0)
+    def first_elem_context_page_obj(self, context):
+        post_text_0 = context.text
+        post_author_0 = context.author.username
+        post_group_0 = context.group.title
+        post_slug_0 = context.group.slug
+        self.assertEqual(post_text_0, self.post_second.text)
+        self.assertEqual(context.id, self.post_second.id)
+        self.assertEqual(post_author_0, self.post_second.author.username)
+        self.assertEqual(post_group_0, self.post_second.group.title)
+        self.assertEqual(post_slug_0, self.post_second.group.slug)
 
-    def first_elem_context_group(self, object):
-        group_title_0 = object.title
-        group_slug_0 = object.slug
-        return group_title_0, group_slug_0
+    def first_elem_context_group(self, context):
+        post_group_0 = context.title
+        post_slug_0 = context.slug
+        self.assertEqual(context.id, self.post_second.id)
+        self.assertEqual(post_group_0, self.post_second.group.title)
+        self.assertEqual(post_slug_0, self.post_second.group.slug)
 
     def test_index_page_context_correct(self):
         response = self.authorized_client.get(reverse('posts:index'))
         first_object = response.context['page_obj'][0]
-        post_context = self.first_elem_context_page_obj(first_object)
-        self.assertEqual(post_context[0], self.post_second.text)
-        self.assertEqual(post_context[1], self.post_second.author.username)
-        self.assertEqual(post_context[2], self.post_second.group.title)
+        self.first_elem_context_page_obj(first_object)
 
     def test_group_list_context_correct(self):
         response = self.authorized_client.get(reverse(
@@ -99,9 +101,7 @@ class ViewsTestContext(TestCase):
             }
         ))
         first_object = response.context['group']
-        group_context = self.first_elem_context_group(first_object)
-        self.assertEqual(group_context[0], self.post_second.group.title)
-        self.assertEqual(group_context[1], self.post_second.group.slug)
+        self.first_elem_context_group(first_object)
 
     def test_profile_page_context_correct(self):
         response = self.authorized_client.get(reverse(
@@ -111,10 +111,7 @@ class ViewsTestContext(TestCase):
             }
         ))
         first_object = response.context['page_obj'][0]
-        post_context = self.first_elem_context_page_obj(first_object)
-        self.assertEqual(post_context[2], self.post_second.group.title)
-        self.assertEqual(post_context[0], self.post_second.text)
-        self.assertEqual(post_context[1], self.post_second.author.username)
+        self.first_elem_context_page_obj(first_object)
 
     def test_post_detail_context_correct(self):
         response = self.authorized_client.get(reverse(
@@ -124,8 +121,7 @@ class ViewsTestContext(TestCase):
             }
         ))
         first_object = response.context['post']
-        post_text = first_object.text
-        self.assertEqual(post_text, 'Test another text')
+        self.first_elem_context_page_obj(first_object)
 
     def test_create_form_context_correct(self):
         response = self.authorized_client.get(reverse(

@@ -37,9 +37,7 @@ class FormTest(TestCase):
             data=form_data,
             follow=True,
         )
-        post_1 = Post.objects.get(id=self.group.id)
-        author_1 = User.objects.get(username='TestName')
-        group_1 = Group.objects.get(title='Test title')
+        post_1 = Post.objects.order_by('id').last()
         self.assertEqual(Post.objects.count(), count_posts + 1)
         self.assertRedirects(response, reverse(
             'posts:profile',
@@ -47,12 +45,9 @@ class FormTest(TestCase):
                 'username': self.post.author
             }
         ))
-        self.assertEqual(post_1.text, 'Test text')
-        self.assertEqual(author_1.username, 'TestName')
-        self.assertEqual(group_1.title, 'Test title')
+        self.assertEqual(post_1.text, self.post.text)
 
     def test_authorized_edit_post(self):
-        self.client.get(f'/posts/{self.post.id}/edit/')
         form_data = {
             'text': 'Another test text',
             'group': self.group.id
@@ -65,6 +60,8 @@ class FormTest(TestCase):
             data=form_data,
             follow=True,
         )
-        post_edit = Post.objects.get(id=self.group.id)
+        post_edit = Post.objects.order_by('id').last()
+        group_edit = Group.objects.order_by('id').last()
+        self.assertEqual(group_edit.title, self.group.title)
         self.assertEqual(response.status_code, HTTPStatus.OK)
-        self.assertEqual(post_edit.text, 'Another test text')
+        self.assertEqual(post_edit.text, form_data['text'])

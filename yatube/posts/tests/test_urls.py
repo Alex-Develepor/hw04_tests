@@ -25,9 +25,6 @@ class StaticURLTests(TestCase):
             slug='test_slug'
         )
 
-    def setUp(self):
-        self.guest_client = Client()
-
     def test_urls_correct_name_auth_users(self):
         template_urls_auth_users = {
             '/': 'posts/index.html',
@@ -52,7 +49,7 @@ class StaticURLTests(TestCase):
         }
         for address, template in template_urls_all_users.items():
             with self.subTest(address=address):
-                response = self.guest_client.get(address)
+                response = self.client.get(address)
                 self.assertTemplateUsed(response, template)
 
     def test_author_edit_post(self):
@@ -61,4 +58,8 @@ class StaticURLTests(TestCase):
 
     def test_404_error(self):
         response = self.authorized_client.get('/unexisting_page/')
+        self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
+
+    def test_404_error_guest(self):
+        response = self.client.get('/unexisting_page/')
         self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
