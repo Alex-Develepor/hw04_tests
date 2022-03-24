@@ -78,13 +78,15 @@ class ViewsTestContext(TestCase):
         self.assertEqual(post_text_0, self.post_second.text)
         self.assertEqual(context.id, self.post_second.id)
         self.assertEqual(post_author_0, self.post_second.author.username)
+        self.assertEqual(context.author.id, self.post_second.author.id)
+        self.assertEqual(context.group.id, self.post_second.group.id)
         self.assertEqual(post_group_0, self.post_second.group.title)
         self.assertEqual(post_slug_0, self.post_second.group.slug)
 
     def first_elem_context_group(self, context):
         post_group_0 = context.title
         post_slug_0 = context.slug
-        self.assertEqual(context.id, self.post_second.id)
+        self.assertEqual(context.id, self.post_second.group.id)
         self.assertEqual(post_group_0, self.post_second.group.title)
         self.assertEqual(post_slug_0, self.post_second.group.slug)
 

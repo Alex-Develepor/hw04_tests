@@ -34,11 +34,11 @@ class StaticURLTests(TestCase):
             '/create/': 'posts/create_post.html',
 
         }
-
         for address, template in template_urls_auth_users.items():
             with self.subTest(address=address):
                 response = self.authorized_client.get(address)
                 self.assertTemplateUsed(response, template)
+                self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_urls_correct_guest_users(self):
         template_urls_all_users = {
@@ -51,6 +51,7 @@ class StaticURLTests(TestCase):
             with self.subTest(address=address):
                 response = self.client.get(address)
                 self.assertTemplateUsed(response, template)
+                self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_author_edit_post(self):
         response = self.authorized_client.get(f'/posts/{self.post.id}/edit/')
@@ -63,3 +64,13 @@ class StaticURLTests(TestCase):
     def test_404_error_guest(self):
         response = self.client.get('/unexisting_page/')
         self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
+
+    def test_status_code_302(self):
+        template_urls_all_users = {
+            '/create/': 'posts/create_post.html',
+            f'/posts/{self.post.id}/edit/': 'posts/create_post.html'
+        }
+        for address, template in template_urls_all_users.items():
+            with self.subTest(address=address):
+                response = self.client.get(address)
+                self.assertEqual(response.status_code, HTTPStatus.FOUND)

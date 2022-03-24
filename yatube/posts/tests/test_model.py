@@ -24,12 +24,12 @@ class PostModelTest(TestCase):
     def test_models_have_correct_objects_name(self):
         name = PostModelTest.post
         post = name.text[:15]
-        self.assertEqual(post.__str__(), self.post.text)
+        self.assertEqual(post, str(name))
 
     def test_group_name(self):
         name = PostModelTest.group
         group = name.title
-        self.assertEqual(group.__str__(), self.group.title)
+        self.assertEqual(group, str(name))
 
     def test_verbose_name(self):
         post = PostModelTest.post

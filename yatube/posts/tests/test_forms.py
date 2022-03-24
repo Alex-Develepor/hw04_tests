@@ -46,6 +46,7 @@ class FormTest(TestCase):
             }
         ))
         self.assertEqual(post_1.text, self.post.text)
+        self.assertEqual(post_1.group, self.group)
 
     def test_authorized_edit_post(self):
         form_data = {
@@ -60,8 +61,7 @@ class FormTest(TestCase):
             data=form_data,
             follow=True,
         )
-        post_edit = Post.objects.order_by('id').last()
-        group_edit = Group.objects.order_by('id').last()
-        self.assertEqual(group_edit.title, self.group.title)
+        post_edit = Post.objects.get(id=self.post.id)
         self.assertEqual(response.status_code, HTTPStatus.OK)
         self.assertEqual(post_edit.text, form_data['text'])
+        self.assertEqual(post_edit.group, self.group)
